@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+
+    <!-- packaging标签，打包类型：
+            pom: 父类型
+            jar: 内部调用或作为服务使用
+            war: 部署项目
+    -->
+
+    <!--
+        version版本说明：x.x.x    大版本.功能升级.更新(bug)升级
+            SNAPSHOT：快照版
+            alpha：内部测试
+            beta：测试版，相对于alpha有较大稳定性，提供给测试人员
+            release：正式版
+            General Availability(GA)：稳定推广版
+    -->
+    <groupId>com.fangjie.maven</groupId>
+    <artifactId>maven-group</artifactId>
+    <packaging>pom</packaging>
+    <version>1.0-SNAPSHOT</version>
+
+    <!-- 多模块聚合 -->
+    <modules>
+        <module>maven-hello</module>
+        <module>maven-hello2</module>
+    </modules>
+
+    <!-- 可声明全局属性 -->
+    <properties>
+        <project.buile.sourceEncoding>UTF-8</project.buile.sourceEncoding>
+        <mysql.driver.version>5.1.29</mysql.driver.version>
+        <hibernate.version>4.3.11.Final</hibernate.version>
+    </properties>
+
+    <!-- 仓库地址配置,一般在maven安装路径的settings文件中进行配置即可 -->
+    <!--<repositories>-->
+    <!--<repository>-->
+    <!--<id>nexus</id>-->
+    <!--<name>localNexusRepository</name>-->
+    <!--&lt;!&ndash; groups全量工厂路径 &ndash;&gt;-->
+    <!--<url>http://localhost:8081/nexus/content/groups/public/</url>-->
+    <!--<releases>-->
+    <!--&lt;!&ndash; 可以下载release包，默认为true &ndash;&gt;-->
+    <!--<enabled>true</enabled>-->
+    <!--</releases>-->
+    <!--<snapshots>-->
+    <!--&lt;!&ndash; 可以下载snapshot包，默认为false &ndash;&gt;-->
+    <!--<enabled>true</enabled>-->
+    <!--</snapshots>-->
+    <!--</repository>-->
+    <!--</repositories>-->
+
+
+    <!--
+        dependencyManagement：只是声明依赖，并不实现引入。因此子项目需要显示的声明需要用的依赖。
+                              如果不在子项目中声明依赖，是不会从父项目中继承下来的；
+                              只有在子项目中写了该依赖项，并且没有指定具体版本，才会从父项目中继承该项，并且version和scope都读取自父pom;
+                              另外如果子项目中指定了版本号，那么会使用子项目中指定的jar版本
+    -->
+    <dependencyManagement>
+        <dependencies>
+            <!-- hibernate依赖声明，子模块可自行选择是否需要继承 -->
+            <dependency>
+                <groupId>org.hibernate</groupId>
+                <artifactId>hibernate-core</artifactId>
+                <version>${hibernate.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <!-- 配置部署的远程仓库
+        mvn:deploy，需要在maven配置文件settings文件中进行如下servers配置
+        注意：distributionManagement中的ID必须与server中的ID保持一致
+     <servers>
+        <server>
+                <id>snapshots</id>
+                <username>deployment</username>
+                <password>deployment</password>
+        </server>
+
+        <server>
+          <id>releases</id>
+          <username>deployment</username>
+          <password>deployment</password>
+        </server>
+  </servers>
+
+    -->
+    <distributionManagement>
+        <repository>
+            <id>releases</id>
+            <name>Internal Releases</name>
+            <url>http://localhost:8081/nexus/content/repositories/snapshots/</url>
+        </repository>
+
+        <snapshotRepository>
+            <id>snapshots</id>
+            <name>nexus distribution snapshot repository</name>
+            <url>http://localhost:8081/nexus/content/repositories/releases/</url>
+        </snapshotRepository>
+    </distributionManagement>
+
+
+    <build>
+        <!-- pluginManagement与dependencyManagement相似，只是声明作用,具体是否使用，在子模块中进行声明 -->
+        <pluginManagement>
+            <plugins>
+                <!-- 编译版本 -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>2.3.2</version>
+                    <!-- 插件中可指定相关依赖 -->
+                    <!--<dependencies>-->
+                    <!--<dependency>-->
+                    <!--<groupId></groupId>-->
+                    <!--<artifactId></artifactId>-->
+                    <!--</dependency>-->
+                    <!--</dependencies>-->
+                    <configuration>
+                        <source>1.7</source>
+                        <target>1.7</target>
+                        <encoding>UTF-8</encoding>
+                    </configuration>
+                </plugin>
+                <!-- source源码插件 -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>2.2.1</version>
+                    <!-- 绑定生命周期 -->
+                    <executions>
+                        <!-- 绑定在compile声明周期后进行source打包 -->
+                        <execution>
+                            <id>attach-source</id>
+                            <phase>compile</phase>
+                            <goals>
+                                <goal>jar-no-fork</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+
+                <!-- 测试报告 -->
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>cobertura-maven-plugin</artifactId>
+                    <!--<version>2.7</version>-->
+                    <configuration>
+                        <formats>
+                            <format>html</format>
+                            <format>xml</format>
+                        </formats>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>cobertura-report</id>
+                            <phase>test</phase>
+                            <goals>
+                                <goal>cobertura</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+</project>

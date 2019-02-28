@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.fangjie.maven</groupId>
+        <artifactId>maven-group</artifactId>
+        <version>1.0-SNAPSHOT</version>
+        <!-- 相对路径,默认为“../pom.xml” -->
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <!-- 使用了parent继承后，当前groupId标签可省略 -->
+    <groupId>com.fangjie.maven</groupId>
+    <artifactId>maven2</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <dependencies>
+        <dependency>
+            <!-- ${project.groupId}自带属性，引用当前项目的groupId -->
+            <groupId>${project.groupId}</groupId>
+            <artifactId>maven</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <!-- 插件管理 -->
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+            <!-- source源码插件 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+</project>
